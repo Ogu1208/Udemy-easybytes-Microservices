@@ -1,10 +1,13 @@
 package com.easybytes.accounts.service.impl;
 
 import com.easybytes.accounts.constant.AccountsConstants;
+import com.easybytes.accounts.dto.AccountsDto;
 import com.easybytes.accounts.dto.CustomerDto;
 import com.easybytes.accounts.entity.Accounts;
 import com.easybytes.accounts.entity.Customer;
 import com.easybytes.accounts.exception.CustomerAlreadyExistsException;
+import com.easybytes.accounts.exception.ResourceNotFoundException;
+import com.easybytes.accounts.mapper.AccountsMapper;
 import com.easybytes.accounts.mapper.CustomerMapper;
 import com.easybytes.accounts.repository.AccountsRepository;
 import com.easybytes.accounts.repository.CustomerRepository;
@@ -44,7 +47,7 @@ public class AccountsServiceImpl implements IAccountService {
 
     /**
      * @param customer - Customer Object
-     * @return the new account details
+      * @return the new account details
      */
     private Accounts createNewAccount(Customer customer) {
         Accounts newAccount = new Accounts();
@@ -58,5 +61,25 @@ public class AccountsServiceImpl implements IAccountService {
         newAccount.setCreatedBy("Anonymous");
 
         return newAccount;
+    }
+
+    /**
+     *
+     * @param mobileNumber - Input Mobile Number
+     * @return Accounts Details based on a given mobileNumber
+     */
+    @Override
+    public CustomerDto fetchAccount(String mobileNumber) {
+        Customer customer = customerRepository.findByMobileNumber(mobileNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", "mobileNumber", mobileNumber));
+
+        Accounts account = accountsRepository.findByCustomerId(customer.getCustomerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Account", "customerId", customer.getCustomerId().toString()));
+
+
+        CustomerDto customerDto = CustomerMapper.mapToCustomerDto(customer, new CustomerDto());
+        customerDto.setAccountsDto(AccountsMapper.mapToAccountsDto(account, new AccountsDto()));
+
+        return customerDto;
     }
 }
