@@ -18,7 +18,7 @@ public class CustomerDto {
     @Size(min = 5, max = 30, message = "The length of the customer name should be between 5 and 30")
     @Schema(
             description = "Name of the customer",
-            example = "Ogu"
+            example = "Ogu1208"
     )
     private String name;
 
